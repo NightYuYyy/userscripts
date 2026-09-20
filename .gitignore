@@ -4,3 +4,6 @@ Thumbs.db
 *.log
 .omc/
 .ccg/
+
+# ReClaude 角标本地密钥
+AutoHotkey/reclaude-badge.ini
