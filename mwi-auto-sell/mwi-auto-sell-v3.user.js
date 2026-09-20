@@ -2,9 +2,9 @@
 // @name:en         [MWI]Inventory Items Quick Sell Assistant (WebSocket Version)
 // @name            [银河奶牛]库存物品一键自动出售（接口版）v3
 // @namespace       mwi-auto-sell-v3
-// @version         3.0.0
-// @description:en  Select an inventory item, press S: fetches the order book over the game's WebSocket and posts a sell listing for the whole stack at the lowest current ask. No UI clicking.
-// @description     选中库存物品后按 S：直接通过游戏 WebSocket 读取订单簿，按当前最低卖价把整组物品挂牌出售，不点任何按钮。
+// @version         3.1.0
+// @description:en  Select an inventory item, press S to list the whole stack at the lowest ask, or D to instantly sell into the best bid. Talks to the game's WebSocket directly, no UI clicking.
+// @description     选中库存物品后按 S 按最低卖价挂牌整组，按 D 即时卖给最高买单。直接走游戏 WebSocket，不点任何按钮。
 // @author          zhengjiyong
 // @license         MIT
 // @match           https://www.milkywayidle.com/game*
@@ -19,7 +19,7 @@
 
     const zh = navigator.language.startsWith('zh');
     const t = (z, e) => (zh ? z : e);
-    const CONFIG = { hotkey: 's', replyTimeout: 3000 };
+    const CONFIG = { listKey: 's', instantKey: 'd', replyTimeout: 3000 };
 
     // ---- WebSocket 拦截：拿到游戏 socket，维护库存映射，分发等待中的回复 ----
     let socket = null;
@@ -82,13 +82,13 @@
 
     // ---- 主流程 ----
     let running = false;
-    async function run() {
+    async function run(instant) {
         if (running) return;
         const item = selectedItem();
         if (!item) return notify(t('请先选择一个物品！', 'Select an item first!'), 'error');
         if (!socket || socket.readyState !== 1) return notify(t('游戏连接未就绪', 'Game socket not ready'), 'error');
-        const quantity = inventory.get(`${item.itemHrid}:${item.level}`);
-        if (!quantity) return notify(t('未找到该物品的库存数量（请刷新页面）', 'Inventory count unknown (reload page)'), 'error');
+        const owned = inventory.get(`${item.itemHrid}:${item.level}`);
+        if (!owned) return notify(t('未找到该物品的库存数量（请刷新页面）', 'Inventory count unknown (reload page)'), 'error');
 
         running = true;
         const start = performance.now();
@@ -96,16 +96,26 @@
             const bookReply = waitFor(m => m.type === 'market_item_order_books_updated' && m.marketItemOrderBooks?.itemHrid === item.itemHrid);
             send({ type: 'get_market_item_order_books', getMarketItemOrderBooksData: { itemHrid: item.itemHrid } });
             const book = (await bookReply).marketItemOrderBooks.orderBooks?.[item.level] || {};
-            // 与手动点"+"一致：挂在当前最低卖价；无卖单时退到最高买价
-            const price = book.asks?.[0]?.price ?? book.bids?.[0]?.price;
-            if (!price) throw new Error(t('该物品当前没有市场报价', 'No market price for this item'));
+            let price, quantity;
+            if (instant) {
+                // 右侧"出售"：吃最高买单，数量不超过该价位的买单总量
+                price = book.bids?.[0]?.price;
+                if (!price) throw new Error(t('该物品当前没有买单', 'No bids for this item'));
+                quantity = Math.min(owned, book.bids.filter(b => b.price >= price).reduce((n, b) => n + b.quantity, 0));
+            } else {
+                // 与手动点"+"一致：挂在当前最低卖价；无卖单时退到最高买价
+                price = book.asks?.[0]?.price ?? book.bids?.[0]?.price;
+                if (!price) throw new Error(t('该物品当前没有市场报价', 'No market price for this item'));
+                quantity = owned;
+            }
 
             const ack = waitFor(m => m.type === 'market_listings_updated' || m.type === 'error');
-            send({ type: 'post_market_order', postMarketOrderData: { isSell: true, itemHrid: item.itemHrid, enhancementLevel: item.level, quantity, price, isInstantOrder: false } });
+            send({ type: 'post_market_order', postMarketOrderData: { isSell: true, itemHrid: item.itemHrid, enhancementLevel: item.level, quantity, price, isInstantOrder: !!instant } });
             const reply = await ack;
             if (reply.type === 'error') throw new Error(reply.message);
-            notify(t(`已挂牌 ${quantity} × ${item.itemHrid.slice(7)}${item.level ? ' +' + item.level : ''} @ ${price.toLocaleString()}，耗时 ${Math.round(performance.now() - start)}ms`,
-                     `Listed ${quantity} × ${item.itemHrid.slice(7)}${item.level ? ' +' + item.level : ''} @ ${price.toLocaleString()} in ${Math.round(performance.now() - start)}ms`), 'success');
+            const what = `${quantity} × ${item.itemHrid.slice(7)}${item.level ? ' +' + item.level : ''} @ ${price.toLocaleString()}`;
+            const ms = Math.round(performance.now() - start);
+            notify(instant ? t(`已即时卖出 ${what}，耗时 ${ms}ms`, `Sold ${what} in ${ms}ms`) : t(`已挂牌 ${what}，耗时 ${ms}ms`, `Listed ${what} in ${ms}ms`), 'success');
         } catch (e) {
             notify(e.message, 'error');
         } finally {
@@ -123,12 +133,13 @@
 
     // 捕获阶段 + 阻止传播：旧版 UI 点击脚本若未禁用，S 键也不会再触发它
     window.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() !== CONFIG.hotkey || e.ctrlKey || e.altKey || e.metaKey) return;
+        const key = e.key.toLowerCase();
+        if ((key !== CONFIG.listKey && key !== CONFIG.instantKey) || e.ctrlKey || e.altKey || e.metaKey) return;
         if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) || e.target.isContentEditable) return; // 聊天框里打字不触发
         e.preventDefault();
         e.stopPropagation();
-        run();
+        run(key === CONFIG.instantKey);
     }, true);
 
-    console.log('[MWI AutoSell v3] loaded, hotkey:', CONFIG.hotkey.toUpperCase());
+    console.log('[MWI AutoSell v3] loaded, hotkeys:', CONFIG.listKey.toUpperCase(), '=list', CONFIG.instantKey.toUpperCase(), '=instant sell');
 })();
