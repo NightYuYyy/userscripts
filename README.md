@@ -10,6 +10,7 @@
 | [Linux.do 智能总结 原生](linux-do-summary/) | 5.3 | `https://linux.do/*` | Linux.do 帖子总结 - 沉浸式原生风格版 | [安装](https://raw.githubusercontent.com/NightYuYyy/userscripts/main/linux-do-summary/linux-do-summary.user.js) |
 | [\[银河奶牛\]库存物品一键自动出售（极速版）](mwi-auto-sell/) | 1.0.7.1 | `https://www.milkywayidle.com/game*` | 一键自动出售库存中指定物品，智能优化操作延迟，提升游戏效率，在原有插件的基础上优化了出售物品的速度，快捷键:S | [安装](https://raw.githubusercontent.com/NightYuYyy/userscripts/main/mwi-auto-sell/mwi-auto-sell-v1.user.js) |
 | [\[银河奶牛\]库存物品一键自动出售（极速版）v2](mwi-auto-sell/) | 2.0.0 | `https://www.milkywayidle.com/game*` | 选中库存物品后按 S：前往市场 → 新出售挂牌 → 价格+1 → 最多 → 发布 → 关闭。逐步轮询等待按钮出现，无固定延迟。 | [安装](https://raw.githubusercontent.com/NightYuYyy/userscripts/main/mwi-auto-sell/mwi-auto-sell-v2.user.js) |
+| [\[银河奶牛\]库存物品一键自动出售（接口版）v3](mwi-auto-sell/) | 3.0.0 | `https://www.milkywayidle.com/game*` | 选中库存物品后按 S：直接通过游戏 WebSocket 读取订单簿，按当前最低卖价把整组物品挂牌出售，不点任何按钮。 | [安装](https://raw.githubusercontent.com/NightYuYyy/userscripts/main/mwi-auto-sell/mwi-auto-sell-v3.user.js) |
 | [网页智能总结 通用版](page-summary/) | 1.0 | `*://*/*` | 任意网页 AI 总结 + 追问 - 论坛/文章/整页自动识别，Discourse 站点走专线 API | [安装](https://raw.githubusercontent.com/NightYuYyy/userscripts/main/page-summary/page-summary.user.js) |
 <!-- scripts:end -->
 
