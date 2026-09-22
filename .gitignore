@@ -4,6 +4,7 @@ Thumbs.db
 *.log
 .omc/
 .ccg/
+.playwright-mcp/
 
 # ReClaude 角标本地密钥
 AutoHotkey/reclaude-badge.ini

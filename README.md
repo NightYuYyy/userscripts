@@ -12,6 +12,7 @@
 | [\[银河奶牛\]库存物品一键自动出售（极速版）v2](mwi-auto-sell/) | 2.0.0 | `https://www.milkywayidle.com/game*` | 选中库存物品后按 S：前往市场 → 新出售挂牌 → 价格+1 → 最多 → 发布 → 关闭。逐步轮询等待按钮出现，无固定延迟。 | [安装](https://raw.githubusercontent.com/NightYuYyy/userscripts/main/mwi-auto-sell/mwi-auto-sell-v2.user.js) |
 | [\[银河奶牛\]库存物品一键自动出售（接口版）v3](mwi-auto-sell/) | 3.1.0 | `https://www.milkywayidle.com/game*` | 选中库存物品后按 S 按最低卖价挂牌整组，按 D 即时卖给最高买单。直接走游戏 WebSocket，不点任何按钮。 | [安装](https://raw.githubusercontent.com/NightYuYyy/userscripts/main/mwi-auto-sell/mwi-auto-sell-v3.user.js) |
 | [网页智能总结 通用版](page-summary/) | 1.0 | `*://*/*` | 任意网页 AI 总结 + 追问 - 论坛/文章/整页自动识别，Discourse 站点走专线 API | [安装](https://raw.githubusercontent.com/NightYuYyy/userscripts/main/page-summary/page-summary.user.js) |
+| [qh 域名池同步 → GPT_Execl](qh-domain-sync/) | 1.1.0 | `http://152.53.54.94:8000/*` | 从 mail.aixhan.com(qh) 拉取域名列表，按上传日期筛选后导入 GPT_Execl(:8000) 的 MoeMail 域名池。本地缓存 + 增量拉取（只取新头部），支持覆盖/追加，凭据仅存本地。 | [安装](https://raw.githubusercontent.com/NightYuYyy/userscripts/main/qh-domain-sync/qh-domain-sync.user.js) |
 | [ReClaude 额度悬浮角标](reclaude-quota-badge/) | 1.0 | `*://*/*` | 任意网页右下角悬浮显示 ReClaude 拼车 5h 剩余额度 + 刷新倒计时 + 号状态。走 API Key(Bearer),不依赖 cookie,全局可用。菜单里设置 Key / 显隐。 | [安装](https://raw.githubusercontent.com/NightYuYyy/userscripts/main/reclaude-quota-badge/reclaude-quota-badge.user.js) |
 <!-- scripts:end -->
 
